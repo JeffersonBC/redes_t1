@@ -19,12 +19,43 @@ class PhysicalSensor {
 
 			return seconds;
 		}
+
+		void SendMeasure(int sckt){
+			printf("%f\n", Measure());
+
+			double m = Measure();
+			send(sckt, &m, sizeof(m), 0);
+		}
 };
 
 class PressureSensor : public PhysicalSensor {
 	public:
 		double Measure(){
 			double t = DeltaTime();
-			return 0.75f + 0.1f * sin(1000 * t);
+			return (0.85f + 0.15f * sin(10000.0f * t)) * 101325.0f; // Pressão aleatória em Pascal
+		}
+};
+
+class TemperatureSensor : public PhysicalSensor {
+	public:
+		double Measure(){
+			double t = DeltaTime();
+			return 297.15f + 2.0f * sin(100000.0f * t); // Temperatura aleatória em Kelvins
+		}
+};
+
+class HumiditySensor : public PhysicalSensor {
+	public:
+		double Measure(){
+			double t = DeltaTime();
+			return 25.0f + 15.0f * sin(100000.0f * t); // Humidade relativa aleatória em %
+		}
+};
+
+class LightSensor : public PhysicalSensor {
+	public:
+		double Measure(){
+			double t = DeltaTime();
+			return 1000.0f + 400.0f * sin(10000.0f * t); // Luminosidade aleatória em Lumens
 		}
 };
