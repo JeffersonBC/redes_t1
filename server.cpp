@@ -2,9 +2,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
+#include <string>
+//#include <stdio.h>
+//#include <stdlib.h>
+
+#include <sensors.h>
 
 #define PORT 8080
 
@@ -18,9 +21,16 @@ int main(int argc, char const *argv[]){
 
 	init_server(new_socket);
 
+	VirtualSensor sensors[3];
+	sensors[0].name = "Cabine de piloto";
+	sensors[1].name = "Cabine de passageiros";
+	sensors[2].name = "Compartimento de bagagem";
+
 	double m;
-	valread = read(new_socket, &m, sizeof(m));
-	printf("Received: %.2f\n", m);
+	for (int i = 0; i < 3; i++){
+		cout << sensors[i].name << "\n";
+		sensors[i].ReadMeasure(new_socket);
+	}
 
 	return 0;
 }
@@ -39,7 +49,7 @@ int init_server(int &new_socket){
 
 	// Forcefully attaching socket to the port 8080
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
-		perror("setsockopt");
+		perror("setsockopt failed");
 		exit(EXIT_FAILURE);
 	}
 	address.sin_family = AF_INET;
@@ -60,4 +70,5 @@ int init_server(int &new_socket){
 		exit(EXIT_FAILURE);
 	}
 
+	return 0;
 }

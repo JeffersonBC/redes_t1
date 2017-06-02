@@ -17,11 +17,6 @@ int init_socket(int &sckt);
 
 
 int main(int argc, char const *argv[]){
-	char const *hello = "Hello from client";
-	char buffer[1024] = {0};
-	int valread;
-
-
 	int sckt;
 	init_socket(sckt);
 
@@ -31,12 +26,12 @@ int main(int argc, char const *argv[]){
 	HumiditySensor 		fixed_humidity[3];
 	LightSensor			fixed_light[3];
 
-	//send(sckt , hello, strlen(hello), 0);
-	fixed_pressure[0].SendMeasure(sckt);
-	printf("%.2f\n", fixed_pressure[0].Measure());
-
-	//valread = read(sckt , buffer, 1024);
-	//printf("%s\n",buffer );
+	for (int i = 0; i < 3; i++){
+		fixed_pressure[i].SendMeasure(sckt);
+		fixed_temperature[i].SendMeasure(sckt);
+		fixed_humidity[i].SendMeasure(sckt);
+		fixed_light[i].SendMeasure(sckt);
+	}
 
 	return 0;
 }

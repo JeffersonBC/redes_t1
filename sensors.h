@@ -1,7 +1,26 @@
 #include <math.h>
 #include <time.h>
+#include <string>
+
+using namespace std;
+
+class VirtualSensor {
+	public:
+		string name;
+
+		void ReadMeasure(int sckt){
+			for (int j = 0; j < 4; j++){
+				double m;
+				int valread = read(sckt, &m, sizeof(m));
+				printf("Received: %.2f\n", m);
+			}
+		}
+};
 
 class PhysicalSensor {
+	private:
+		string name;
+		string unit;
 	public:
 		virtual double Measure() = 0;
 
