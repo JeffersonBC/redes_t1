@@ -1,7 +1,6 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <curses.h>
 
 #include <client-server.h>
 #include <virtual_sensors.h>
@@ -9,46 +8,53 @@
 
 using namespace std;
 
+void InitializeSensors(VirtualSensor (&fixed_sensors)[4], VirtualSensor (&mobile_sensors)[4]);
 
-void Menu(int sckt);
-void Live(int sckt);
+void Menu(int sckt, VirtualSensor (&fixed_sensors)[4], VirtualSensor (&mobile_sensors)[4]);
+void Live(int sckt, VirtualSensor (&fixed_sensors)[4], VirtualSensor (&mobile_sensors)[4]);
 
 void ReadMeasures(int sckt);
 void ReadMeasuresCompact(int sckt);
 
-VirtualSensor fixed_sensors[4];
-VirtualSensor mobile_sensors[4];
-
 
 int main(int argc, char const *argv[]){
+	// Inicializa descriptor do socket de cliente
 	int sckt;
 	InitClient(sckt);
 
+	// Formata a saída de números
 	cout << fixed;
-    cout << setprecision(2);
+	cout << setprecision(2);
 
-	fixed_sensors[0].name = "Cabine de piloto";
-	fixed_sensors[1].name = "Cabine de passageiros";
-	fixed_sensors[2].name = "Compartimento de bagagem";
-	fixed_sensors[3].name = "Banheiro";
+	// Inicializa os sensores virtuais
+	VirtualSensor fixed_sensors[4];
+	VirtualSensor mobile_sensors[4];
+	InitializeSensors(fixed_sensors, mobile_sensors);
 
-	mobile_sensors[0].name = "Piloto";
-	mobile_sensors[1].name = "Co-piloto";
-	mobile_sensors[2].name = "Aeromoça 1";
-	mobile_sensors[3].name = "Aeromoça 2";
 
-	//Menu(sckt);
-	Live(sckt);
+	// Se o primeiro argumento na execução da central for "live", usa interface automática
+	string live_flag;
+	if (argc > 1){
+		live_flag = argv[1];
+
+		if (live_flag == "live")
+			Live(sckt, fixed_sensors, mobile_sensors); // Interface automática
+		else
+			Menu(sckt, fixed_sensors, mobile_sensors); // Interface interativa
+	}
+	else
+		Menu(sckt, fixed_sensors, mobile_sensors); // Interface interativa
+
 
 	return 0;
 }
 
-
-void Menu(int sckt){
+// Interface para o usuário digitar qual sensor ele quer checar
+void Menu(int sckt, VirtualSensor (&fixed_sensors)[4], VirtualSensor (&mobile_sensors)[4]){
 	int menu1, menu2;
 
 	do {
-		cout << "Selecione uma das opções abaixo:\n1. Sensores fixos\n2. Sensores moveis\n0. Sair\n:";
+		cout << "Selecione uma das opcoes abaixo:\n1. Sensores fixos\n2. Sensores moveis\n0. Sair\n:";
 
 		cin >> menu1;
 
@@ -82,13 +88,13 @@ void Menu(int sckt){
 				}
 			}
 			else {
-				cout << "Opção inválida. ";
+				cout << "Opcao invalida. ";
 			}
 		}
 
 		// Sensores móveis
 		else if (menu1 == 2){
-			cout << "2.1. Piloto\n2.2. Co-piloto\n2.3. Aeromoça 1\n2.4. Aeromoça 2\n2.5. Todos\n:";
+			cout << "2.1. Piloto\n2.2. Co-piloto\n2.3. Aeromoca 1\n2.4. Aeromoca 2\n2.5. Todos\n:";
 
 			cin >> menu2;
 
@@ -117,7 +123,7 @@ void Menu(int sckt){
 				}
 			}
 			else {
-				cout << "Opção inválida. ";
+				cout << "Opcao invalida. ";
 			}
 		}
 
@@ -127,13 +133,22 @@ void Menu(int sckt){
 		}
 
 		else {
-			cout << "Opção inválida. ";
+			cout << "Opcao invalida. ";
 		}
 	}
 	while (menu1 != 0);
+
+	// Envia requisição para encerrar servidor
+	menu1 = -1;
+	menu2 = 0;
+
+	send(sckt, &menu1, sizeof(menu1), 0);
+	send(sckt, &menu2, sizeof(menu2), 0);
 }
 
-void Live(int sckt){
+// Interface na qual todos os sensores são mostrados e atualizados automaticamente até
+// encerrar o programa
+void Live(int sckt, VirtualSensor (&fixed_sensors)[4], VirtualSensor (&mobile_sensors)[4]){
 	while(true){
 		cout << "\n\n\n";
 
@@ -164,7 +179,20 @@ void Live(int sckt){
 	}
 }
 
-// Lê valores, nomes e unidades de medida de um sensor virtual
+// Inicializa os sensores virtuais
+void InitializeSensors(VirtualSensor (&fixed_sensors)[4], VirtualSensor (&mobile_sensors)[4]){
+	fixed_sensors[0].name = "Cabine de piloto";
+	fixed_sensors[1].name = "Cabine de passageiros";
+	fixed_sensors[2].name = "Compartimento de bagagem";
+	fixed_sensors[3].name = "Banheiro";
+
+	mobile_sensors[0].name = "Piloto";
+	mobile_sensors[1].name = "Co-piloto";
+	mobile_sensors[2].name = "Aeromoca 1";
+	mobile_sensors[3].name = "Aeromoca 2";
+}
+
+// Lê valores, nomes e unidades de medida de um sensor virtual e imprime na tela
 void ReadMeasures(int sckt){
 	for (int j = 0; j < 4; j++){
 		char name[128] = {0};
@@ -180,6 +208,7 @@ void ReadMeasures(int sckt){
 	}
 }
 
+// Lê valores, nomes e unidades de medida de um sensor virtual, e imprime de maneira compacta
 void ReadMeasuresCompact(int sckt){
 	for (int j = 0; j < 4; j++){
 		char name[128] = {0};

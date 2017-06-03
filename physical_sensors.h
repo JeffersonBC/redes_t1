@@ -42,7 +42,7 @@ class PressureSensor : public PhysicalSensor {
 
 		double Measure(){
 			float r = rand() % 1000;
-			return (bias + 0.9f + 0.1f * sin(r)) * 101325.0f; // Pressão aleatória em Pascal
+			return (bias + 1.0f + 0.0001f * sin(r)) * 101325.0f; // Pressão aleatória em Pascal
 		}
 };
 
@@ -50,12 +50,12 @@ class TemperatureSensor : public PhysicalSensor {
 	public:
 		TemperatureSensor (){
 			name = "Temperatura";
-			unit = "K";
+			unit = "ºC";
 			bias = 0;
 		}
 		double Measure(){
 			float r = rand() % 1000;
-			return bias + 297.15f + 2.0f * sin(r); // Temperatura aleatória em Kelvins
+			return bias + 24.0f + 2.0f * sin(r); // Temperatura aleatória em graus celcius
 		}
 };
 
@@ -103,7 +103,7 @@ class HeartbeatSensor : public PhysicalSensor {
 class BreathSensor : public PhysicalSensor {
 	public:
 		BreathSensor(){
-			name = "Respiração";
+			name = "Respiracao";
 			unit = "rpm";
 			bias = 0;
 		}

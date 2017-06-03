@@ -17,6 +17,7 @@ void InitClient(int &sckt) {
 
 	int err;
 
+	// Inicializa socket
 	do {
 		err = (sckt = socket(AF_INET, SOCK_STREAM, 0));
 		if (err < 0){
@@ -26,8 +27,8 @@ void InitClient(int &sckt) {
 	}
 	while (err < 0);
 
+	// Configura o socket para usar a porta 8080 no endereço local
 	memset(&serv_addr, '0', sizeof(serv_addr));
-
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(PORT);
 
@@ -36,11 +37,12 @@ void InitClient(int &sckt) {
 		exit(EXIT_FAILURE);
 	}
 
+	// Tenta conectar com o servidor
 	do {
 		err = connect(sckt, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 		if (err < 0){
-			cout << "Conexão com o servidor falhou. Tentando novamente.\n";
-			sleep(2);
+			cout << "Conexão com o servidor falhou. Tentando novamente...\n";
+			sleep(3);
 		}
 	}
 	while(err < 0);
@@ -48,8 +50,7 @@ void InitClient(int &sckt) {
 	cout << "Conexão com os sensores estabelecida!\n\n";
 }
 
-
-void InitServer(int &new_socket){
+void InitServer(int &sckt) {
 	int server_fd;
 	struct sockaddr_in address;
 	int opt = 1;
@@ -60,7 +61,6 @@ void InitServer(int &new_socket){
 		perror("socket failed");
 		exit(EXIT_FAILURE);
 	}
-
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
 		perror("setsockopt failed");
 		exit(EXIT_FAILURE);
@@ -80,7 +80,7 @@ void InitServer(int &new_socket){
 	}
 
 	cout << "Aguardando conexão da central...\n";
-	if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
+	if ((sckt = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
 		perror("accept failed");
 		exit(EXIT_FAILURE);
 	}
