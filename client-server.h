@@ -45,7 +45,7 @@ void init_client(int &sckt) {
 	}
 	while(err < 0);
 
-	cout << "Conexão com os sensores estabelecida!\n";
+	cout << "Conexão com os sensores estabelecida!\n\n";
 }
 
 
@@ -79,7 +79,7 @@ void init_server(int &new_socket){
 		exit(EXIT_FAILURE);
 	}
 
-	cout << "Aguardando conexão do cliente...\n";
+	cout << "Aguardando conexão da central...\n";
 	if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
 		perror("accept failed");
 		exit(EXIT_FAILURE);
