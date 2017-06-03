@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void init_client(int &sckt) {
+void InitClient(int &sckt) {
 	struct sockaddr_in address;
 	struct sockaddr_in serv_addr;
 
@@ -49,7 +49,7 @@ void init_client(int &sckt) {
 }
 
 
-void init_server(int &new_socket){
+void InitServer(int &new_socket){
 	int server_fd;
 	struct sockaddr_in address;
 	int opt = 1;

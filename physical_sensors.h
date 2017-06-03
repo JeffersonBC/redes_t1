@@ -35,7 +35,7 @@ class PhysicalSensor {
 class PressureSensor : public PhysicalSensor {
 	public:
 		PressureSensor (){
-			name = "Pressao";
+			name = "Pressão";
 			unit = "Pa";
 			bias = 0;
 		}
@@ -103,7 +103,7 @@ class HeartbeatSensor : public PhysicalSensor {
 class BreathSensor : public PhysicalSensor {
 	public:
 		BreathSensor(){
-			name = "Respiracao";
+			name = "Respiração";
 			unit = "rpm";
 			bias = 0;
 		}

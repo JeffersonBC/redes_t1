@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <curses.h>
 
 #include <client-server.h>
 #include <virtual_sensors.h>
@@ -9,8 +10,11 @@
 using namespace std;
 
 
-void menu(int sckt);
+void Menu(int sckt);
+void Live(int sckt);
+
 void ReadMeasures(int sckt);
+void ReadMeasuresCompact(int sckt);
 
 VirtualSensor fixed_sensors[4];
 VirtualSensor mobile_sensors[4];
@@ -18,7 +22,7 @@ VirtualSensor mobile_sensors[4];
 
 int main(int argc, char const *argv[]){
 	int sckt;
-	init_client(sckt);
+	InitClient(sckt);
 
 	cout << fixed;
     cout << setprecision(2);
@@ -33,13 +37,14 @@ int main(int argc, char const *argv[]){
 	mobile_sensors[2].name = "Aeromoça 1";
 	mobile_sensors[3].name = "Aeromoça 2";
 
-	menu(sckt);
+	//Menu(sckt);
+	Live(sckt);
 
 	return 0;
 }
 
 
-void menu(int sckt){
+void Menu(int sckt){
 	int menu1, menu2;
 
 	do {
@@ -77,7 +82,7 @@ void menu(int sckt){
 				}
 			}
 			else {
-				cout << "\nOpção inválida. ";
+				cout << "Opção inválida. ";
 			}
 		}
 
@@ -112,7 +117,7 @@ void menu(int sckt){
 				}
 			}
 			else {
-				cout << "\nOpção inválida. ";
+				cout << "Opção inválida. ";
 			}
 		}
 
@@ -122,10 +127,41 @@ void menu(int sckt){
 		}
 
 		else {
-			cout << "\nOpção inválida. ";
+			cout << "Opção inválida. ";
 		}
 	}
-	while (menu != 0);
+	while (menu1 != 0);
+}
+
+void Live(int sckt){
+	while(true){
+		cout << "\n\n\n";
+
+		int menu1 = 3, menu2 = 0;
+
+		// Envia requisição
+		send(sckt, &menu1, sizeof(menu1), 0);
+		send(sckt, &menu2, sizeof(menu2), 0);
+
+		// Recebe resposta dos sensores
+		for (int i = 0; i < 4; i++){
+			cout << fixed_sensors[i].name << '\n';
+			ReadMeasuresCompact(sckt);
+			cout << "\n\n";
+		}
+
+		cout << "\n";
+
+		for (int i = 0; i < 4; i++){
+			cout << mobile_sensors[i].name << '\n';
+			ReadMeasuresCompact(sckt);
+
+			if (i < 3) cout << "\n\n";
+			else cout << "\n";
+		}
+
+		sleep(3);
+	}
 }
 
 // Lê valores, nomes e unidades de medida de um sensor virtual
