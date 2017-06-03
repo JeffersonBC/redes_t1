@@ -4,21 +4,8 @@
 
 using namespace std;
 
-class VirtualSensor {
-	public:
-		string name;
-
-		void ReadMeasure(int sckt){
-			for (int j = 0; j < 4; j++){
-				double m;
-				int valread = read(sckt, &m, sizeof(m));
-				printf("Received: %.2f\n", m);
-			}
-		}
-};
-
 class PhysicalSensor {
-	private:
+	protected:
 		string name;
 		string unit;
 	public:
@@ -32,23 +19,37 @@ class PhysicalSensor {
 			y2k.tm_hour = 0;   y2k.tm_min = 0; y2k.tm_sec = 0;
 			y2k.tm_year = 100; y2k.tm_mon = 0; y2k.tm_mday = 1;
 
-			time(&timer);  /* get current time; same as: timer = time(NULL)  */
+			time(&timer);
 
-			seconds = difftime(timer,mktime(&y2k));
+			seconds = difftime(timer, mktime(&y2k));
 
 			return seconds;
 		}
 
+		// Envia valor, nome e unidade de medida do sensor
 		void SendMeasure(int sckt){
-			printf("%f\n", Measure());
-
+			const char* local_name = name.c_str();
+			const char* local_unit = unit.c_str();
 			double m = Measure();
+
 			send(sckt, &m, sizeof(m), 0);
+			send(sckt, local_name, 128, 0);
+			send(sckt, local_unit, 8, 0);
+
+			printf("Sent: %f %s %s\n", Measure(), local_name, local_unit);
 		}
+
+		string SensorName(){return name;}
+		string SensorUnit(){return unit;}
 };
 
 class PressureSensor : public PhysicalSensor {
 	public:
+		PressureSensor (){
+			name = "Pressao";
+			unit = "Pa";
+		}
+
 		double Measure(){
 			double t = DeltaTime();
 			return (0.85f + 0.15f * sin(10000.0f * t)) * 101325.0f; // Pressão aleatória em Pascal
@@ -57,6 +58,10 @@ class PressureSensor : public PhysicalSensor {
 
 class TemperatureSensor : public PhysicalSensor {
 	public:
+		TemperatureSensor (){
+			name = "Temperatura";
+			unit = "K";
+		}
 		double Measure(){
 			double t = DeltaTime();
 			return 297.15f + 2.0f * sin(100000.0f * t); // Temperatura aleatória em Kelvins
@@ -65,6 +70,10 @@ class TemperatureSensor : public PhysicalSensor {
 
 class HumiditySensor : public PhysicalSensor {
 	public:
+		HumiditySensor(){
+			name = "Humidade";
+			unit = "\%";
+		}
 		double Measure(){
 			double t = DeltaTime();
 			return 25.0f + 15.0f * sin(100000.0f * t); // Humidade relativa aleatória em %
@@ -73,6 +82,11 @@ class HumiditySensor : public PhysicalSensor {
 
 class LightSensor : public PhysicalSensor {
 	public:
+		LightSensor(){
+			name = "Luminosidade";
+			unit = "lm";
+		}
+
 		double Measure(){
 			double t = DeltaTime();
 			return 1000.0f + 400.0f * sin(10000.0f * t); // Luminosidade aleatória em Lumens

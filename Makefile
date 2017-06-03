@@ -1,7 +1,7 @@
-all: server clients
+all: central sensores
 
-server: server.cpp sensors.h
-	gcc server.cpp -o server -I. -lm -lstdc++
+central: central.cpp virtual_sensors.h client-server.h
+	gcc central.cpp -o central -I. -lm -lstdc++
 
-clients: clients.cpp sensors.h
-	gcc clients.cpp -o clients -I. -lm -lstdc++
+sensores: sensores.cpp physical_sensors.h client-server.h
+	gcc sensores.cpp -o sensores -I. -lm -lstdc++
